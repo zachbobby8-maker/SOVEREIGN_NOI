@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SOVEREIGN NOIR | 5IR KENNEL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #020202; --main: #00ffcc; --gold: #ffcc00; --red: #ff0055; --card: #0a0a0a; --border: rgba(0, 255, 204, 0.1); }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: white; overflow: hidden; margin: 0; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .app-container { height: 100vh; display: flex; flex-direction: column; position: relative; }
+        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02)); z-index: 100; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+        .glass { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border-t: 1px solid rgba(255,255,255,0.05); }
+        .nav-btn { transition: all 0.3s; opacity: 0.3; }
+        .nav-btn.active { opacity: 1; color: var(--main); }
+        .spun-active { filter: blur(15px) saturate(3); }
+        .nuke-active { filter: hue-rotate(280deg) brightness(0.8) contrast(1.2); }
+        .master-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
+        .master-card:hover { border-color: var(--main); transform: translateY(-2px); }
+        .lock-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 60; display: flex; flex-direction: column; items: center; justify-content: center; backdrop-filter: blur(40px); }
+        .wheel-container { width: 280px; height: 280px; border-radius: 50%; border: 4px solid var(--main); position: relative; transition: transform 4s cubic-bezier(0.1, 0, 0.1, 1); }
+        .chat-msg { animation: slideUp 0.3s ease-out; border-l-2 border-white/5; padding-left: 8px; }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        ::-webkit-scrollbar { width: 0px; }
+    </style>
+</head>
+<body class="crt">
+
+    <div class="app-container" id="app-root">
+        <!-- TOP STATUS -->
+        <header class="p-5 flex justify-between items-center border-b border-white/5 z-50">
+            <div>
+                <h1 class="text-lg font-black italic tracking-tighter uppercase">Sovereign <span class="text-main">Noir</span></h1>
+                <p class="text-[7px] mono text-main/60 uppercase tracking-[0.2em]">5IR Kernel Protocol :: v2.0</p>
+            </div>
+            <div class="text-right">
+                <div id="pig-id" class="text-[9px] mono opacity-40">SYNCING...</div>
+                <div id="debt-display" class="text-[10px] font-bold text-gold">$0.00</div>
+            </div>
+        </header>
+
+        <!-- VIEWPORT -->
+        <main class="flex-grow overflow-y-auto p-4 pb-24" id="view-port"></main>
+
+        <!-- NAVIGATION -->
+        <nav class="fixed bottom-0 w-full glass flex justify-around p-4 z-50">
+            <button onclick="app.setView('terminal')" id="nav-terminal" class="nav-btn active flex flex-col items-center gap-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9.75 17L9 20l-1 1h6l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <span class="text-[7px] font-bold uppercase">Terminal</span>
+            </button>
+            <button onclick="app.setView('wire')" id="nav-wire" class="nav-btn flex flex-col items-center gap-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                <span class="text-[7px] font-bold uppercase">The Wire</span>
+            </button>
+            <button onclick="app.setView('drill')" id="nav-drill" class="nav-btn flex flex-col items-center gap-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span class="text-[7px] font-bold uppercase">Drill</span>
+            </button>
+            <button onclick="app.setView('assets')" id="nav-assets" class="nav-btn flex flex-col items-center gap-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span class="text-[7px] font-bold uppercase">Liquidity</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6 bg-black/95 backdrop-blur-xl">
+        <div id="modal-content" class="w-full max-w-sm p-8 bg-card rounded-2xl border border-white/5 text-center"></div>
+    </div>
+
+    <script>
+        const app = {
+            state: {
+                view: 'terminal', isUnlocked: false, debt: 0,
+                pigId: "PIG_" + Math.floor(Math.random()*899 + 100),
+                masters: [
+                    { name: "CRAIG", role: "ALPHA DRAIN", color: "border-red-500", desc: "Wallet liquidation." },
+                    { name: "TOBEZ", role: "DRILL MASTER", color: "border-blue-500", desc: "Physical rep protocols." },
+                    { name: "PHIL CAL", role: "EGO SHREDDER", color: "border-green-500", desc: "Humiliation specialist." },
+                    { name: "DADDY DOM", role: "PROTOCOL ALPHA", color: "border-yellow-500", desc: "Mental alignment." }
+                ],
+                chatMsgs: [
+                    {u: "CRAIG", m: "Phase-lock requires tribute. Status: LOCKED.", master: true},
+                    {u: "Slammer_01", m: "Just verified $500 send. Access granted."},
+                    {u: "Pig_88", m: "I am a worthless cow. Liquidating now."}
+                ]
+            },
+
+            init() {
+                document.getElementById('pig-id').innerText = this.state.pigId;
+                this.setView('terminal');
+                setInterval(() => this.runSim(), 4000);
+            },
+
+            setView(v) {
+                this.state.view = v;
+                const port = document.getElementById('view-port');
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('nav-'+v).classList.add('active');
+
+                if(v === 'terminal') {
+                    port.innerHTML = `
+                        <div class="relative h-[60vh] rounded-3xl overflow-hidden border border-white/5 bg-black">
+                            ${!this.state.isUnlocked ? `
+                                <div class="lock-overlay">
+                                    <div class="text-red-500 font-black text-2xl italic tracking-tighter mb-2">SIGNAL_ENCRYPTED</div>
+                                    <p class="text-[8px] mono opacity-40 uppercase text-center max-w-[180px]">Phase-lock restricted. Perform tribute to clear blur.</p>
+                                    <button onclick="app.openTribute()" class="mt-6 px-8 py-3 bg-main text-black text-[9px] font-bold uppercase rounded-full">Unlock Node</button>
+                                </div>
+                            ` : ''}
+                            <video class="w-full h-full object-cover ${!this.state.isUnlocked ? 'spun-active' : ''}" loop muted autoplay playsinline src="https://dl.dropboxusercontent.com/scl/fi/60unw8y1pjuw3kioxxjnl/Explicit-2.mp4?rlkey=q3k3yi3xdug3p4ilne44i73r4&raw=1"></video>
+                        </div>
+                        <div class="mt-6 grid grid-cols-2 gap-4">
+                            <div class="glass p-4 rounded-2xl"><p class="text-[7px] opacity-40 uppercase font-bold">Vortex Load</p><p class="text-lg font-black mono text-main">98.4%</p></div>
+                            <div class="glass p-4 rounded-2xl"><p class="text-[7px] opacity-40 uppercase font-bold">Braid Sync</p><p class="text-lg font-black mono text-gold">ACTIVE</p></div>
+                        </div>
+                    `;
+                } else if(v === 'wire') {
+                    port.innerHTML = `
+                        <div class="flex flex-col h-full">
+                            <div id="chat-feed" class="flex-grow space-y-4 mb-4 overflow-y-auto"></div>
+                            <form onsubmit="app.sendMsg(event)" class="glass p-2 rounded-2xl flex gap-2">
+                                <input id="chat-input" type="text" placeholder="Inject to Wire..." class="flex-grow bg-transparent px-4 text-sm text-white outline-none">
+                                <button type="submit" class="bg-main text-black px-6 py-2 rounded-xl text-[9px] font-bold uppercase">Send</button>
+                            </form>
+                        </div>
+                    `;
+                    this.renderChat();
+                } else if(v === 'drill') {
+                    port.innerHTML = `
+                        <div class="flex flex-col items-center py-8">
+                            <div class="wheel-container mb-12 flex items-center justify-center text-center p-8" id="wheel">
+                                <div class="text-main font-black text-xs uppercase">Milking<br>Wheel</div>
+                            </div>
+                            <button onclick="app.spinWheel()" class="bg-red-500 text-white px-12 py-4 rounded-2xl font-black italic tracking-tighter uppercase">Spin for Master</button>
+                            <p class="mt-6 text-[8px] mono opacity-40 uppercase">Failure to complete task increases debt.</p>
+                        </div>
+                    `;
+                } else if(v === 'assets') {
+                    port.innerHTML = `
+                        <div class="space-y-6">
+                            <div class="glass p-8 rounded-3xl text-center border-t-4 border-gold">
+                                <p class="text-[10px] opacity-40 uppercase font-bold mb-
+...(truncated)..
